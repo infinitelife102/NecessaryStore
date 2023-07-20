@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Mail, Lock, Eye, EyeOff, Store, Chrome } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Store } from 'lucide-react';
+import { GoogleIcon } from '@/components/icons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,7 +55,12 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message);
+        const msg = error.message || '';
+        if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
+          setError('Google 로그인이 비활성화되어 있습니다. 관리자에게 문의하거나 이메일로 로그인해 주세요.');
+        } else {
+          setError(error.message);
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -109,7 +115,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input pl-10"
+                  className="input-auth pl-10"
                   placeholder="you@example.com"
                 />
               </div>
@@ -129,7 +135,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pl-10 pr-10"
+                  className="input-auth pl-10 pr-10"
                   placeholder="••••••••"
                 />
                 <button
@@ -171,7 +177,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="spinner border-white" />
@@ -197,9 +203,9 @@ export default function LoginPage() {
               <button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center px-4 py-3 rounded-xl text-sm font-medium text-gray-700 bg-gray-50/80 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               >
-                <Chrome className="h-5 w-5 mr-2 text-red-500" />
+                <GoogleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
                 Sign in with Google
               </button>
             </div>

@@ -1,7 +1,34 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { StoreIcon, MailIcon, PhoneIcon, MapPinIcon, FacebookIcon, TwitterIcon, InstagramIcon, YoutubeIcon } from './icons';
+import { supabase } from '@/lib/supabase';
+import { StoreIcon, MailIcon, PhoneIcon, MapPinIcon, FacebookIcon, TwitterIcon, InstagramIcon, YoutubeIcon, Loader2, CheckCircle } from './icons';
 
 export function Footer() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setIsSubmitting(true);
+
+    // Store newsletter subscription in Supabase (table may not exist yet)
+    const { error } = await supabase
+      .from('newsletter_subscriptions')
+      .insert({ email: email.trim() });
+
+    if (!error) {
+      setIsSubscribed(true);
+      setEmail('');
+    }
+
+    setIsSubmitting(false);
+  };
+
   const footerLinks = {
     shop: [
       { label: 'All Products', href: '/products' },
@@ -140,16 +167,34 @@ export function Footer() {
               <h3 className="text-white font-semibold text-lg">Subscribe to our newsletter</h3>
               <p className="text-gray-400">Get the latest deals and updates delivered to your inbox</p>
             </div>
-            <div className="flex w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 md:w-64 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white"
-              />
-              <button className="px-6 py-2 bg-primary-600 text-white rounded-r-lg hover:bg-primary-700 font-medium">
-                Subscribe
-              </button>
-            </div>
+            {isSubscribed ? (
+              <div className="flex items-center text-green-400">
+                <CheckCircle className="h-5 w-5 mr-2" />
+                <span>Thanks for subscribing!</span>
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex w-full md:w-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 md:w-64 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 bg-primary-600 text-white rounded-r-lg font-medium hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>

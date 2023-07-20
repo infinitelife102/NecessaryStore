@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Mail, Lock, User, Eye, EyeOff, Store, Chrome } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Store } from 'lucide-react';
+import { GoogleIcon } from '@/components/icons';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -57,19 +58,23 @@ export default function RegisterPage() {
       }
 
       if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase.from('profiles').insert({
-          id: data.user.id,
-          email,
-          full_name: fullName,
-          role: 'customer',
-        });
+        // DB 트리거(handle_new_user)가 auth.users INSERT 시 profiles를 자동 생성함.
+        // 트리거가 없을 때를 대비해 upsert로 보완 (RLS 통과 시에만).
+        const { error: profileError } = await supabase.from('profiles').upsert(
+          {
+            id: data.user.id,
+            email,
+            full_name: fullName,
+            role: 'customer',
+          },
+          { onConflict: 'id' }
+        );
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
+          console.error('Error upserting profile:', profileError);
         }
 
-        router.push('/auth/verify-email');
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -91,7 +96,12 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        setError(error.message);
+        const msg = error.message || '';
+        if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
+          setError('Google 가입이 비활성화되어 있습니다. 관리자에게 문의하거나 이메일로 가입해 주세요.');
+        } else {
+          setError(error.message);
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -146,7 +156,7 @@ export default function RegisterPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="input pl-10"
+                  className="input-auth pl-10"
                   placeholder="John Doe"
                 />
               </div>
@@ -166,7 +176,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input pl-10"
+                  className="input-auth pl-10"
                   placeholder="you@example.com"
                 />
               </div>
@@ -186,7 +196,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input pl-10 pr-10"
+                  className="input-auth pl-10 pr-10"
                   placeholder="••••••••"
                 />
                 <button
@@ -220,7 +230,7 @@ export default function RegisterPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input pl-10"
+                  className="input-auth pl-10"
                   placeholder="••••••••"
                 />
               </div>
@@ -249,7 +259,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="spinner border-white" />
@@ -275,9 +285,9 @@ export default function RegisterPage() {
               <button
                 onClick={handleGoogleRegister}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center px-4 py-3 rounded-xl text-sm font-medium text-gray-700 bg-gray-50/80 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               >
-                <Chrome className="h-5 w-5 mr-2 text-red-500" />
+                <GoogleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
                 Sign up with Google
               </button>
             </div>

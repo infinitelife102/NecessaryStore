@@ -29,9 +29,9 @@ export default function AuthCallbackPage() {
         if (!profile) {
           await supabase.from('profiles').insert({
             id: session.user.id,
-            email: session.user.email ?? '',
-            full_name: session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? null,
-            avatar_url: session.user.user_metadata?.avatar_url ?? null,
+            email: session.user.email,
+            full_name: session.user.user_metadata.full_name || session.user.user_metadata.name,
+            avatar_url: session.user.user_metadata.avatar_url,
             role: 'customer',
           });
         }

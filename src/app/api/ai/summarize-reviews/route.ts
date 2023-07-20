@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const GROK_API_KEY = process.env.GROK_API_KEY;
+const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +11,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Reviews array is required' },
         { status: 400 }
+      );
+    }
+
+    if (!GROK_API_KEY) {
+      return NextResponse.json(
+        { error: 'Grok API key not configured' },
+        { status: 500 }
       );
     }
 
@@ -38,23 +43,40 @@ Please provide:
 
 Format the response as JSON with keys: summary, positives, negatives, sentiment, keyAspects`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-oss-120b',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert at analyzing customer reviews and extracting key insights.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.5,
-      max_tokens: 600,
+    const response = await fetch(GROK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'grok-2-1212',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert at analyzing customer reviews and extracting key insights. Always respond with valid JSON.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.5,
+        max_tokens: 800,
+      }),
     });
 
-    const content = completion.choices[0]?.message?.content;
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Grok API error:', errorData);
+      return NextResponse.json(
+        { error: 'Failed to summarize reviews' },
+        { status: 500 }
+      );
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content;
 
     if (!content) {
       return NextResponse.json(
@@ -66,9 +88,13 @@ Format the response as JSON with keys: summary, positives, negatives, sentiment,
     // Parse the JSON response
     let result;
     try {
-      result = JSON.parse(content);
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[0]);
+      } else {
+        result = JSON.parse(content);
+      }
     } catch {
-      // If not valid JSON, return as text
       result = {
         summary: content.slice(0, 300),
         positives: [],

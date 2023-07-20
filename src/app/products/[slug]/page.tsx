@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/providers';
+import { useCart } from '@/lib/cart-context';
+import { useWishlist } from '@/lib/wishlist-context';
 import { Product, Review } from '@/types';
 import {
   Star,
@@ -17,10 +20,18 @@ import {
   Check,
   Minus,
   Plus,
+  Facebook,
+  Twitter,
+  Link as LinkIcon,
+  CheckCircle,
 } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const slug = params.slug as string;
   
   const [product, setProduct] = useState<Product | null>(null);
@@ -28,8 +39,10 @@ export default function ProductDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'shipping'>('description');
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
+  const [shareTooltip, setShareTooltip] = useState('');
 
   useEffect(() => {
     if (slug) {
@@ -70,12 +83,48 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = async () => {
-    // Implement cart functionality
-    alert(`Added ${quantity} item(s) to cart`);
+    if (!product) return;
+    
+    setIsAddingToCart(true);
+    await addToCart(product, quantity);
+    setIsAddingToCart(false);
+    setShowAddedMessage(true);
+    setTimeout(() => setShowAddedMessage(false), 2000);
   };
 
   const handleToggleWishlist = async () => {
-    setIsInWishlist(!isInWishlist);
+    if (!product) return;
+    
+    if (isInWishlist(product.id)) {
+      await removeFromWishlist(product.id);
+    } else {
+      await addToWishlist(product);
+    }
+  };
+
+  const handleShare = async (platform: string) => {
+    const url = window.location.href;
+    const text = `Check out ${product?.name} on MarketHub!`;
+
+    switch (platform) {
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+        break;
+      case 'copy':
+        await navigator.clipboard.writeText(url);
+        setShareTooltip('Link copied!');
+        setTimeout(() => setShareTooltip(''), 2000);
+        break;
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!product) return;
+    await addToCart(product, quantity);
+    router.push('/checkout');
   };
 
   if (isLoading) {
@@ -105,6 +154,7 @@ export default function ProductDetailPage() {
     : 0;
 
   const images = product.images.length > 0 ? product.images : [product.featured_image];
+  const inWishlist = isInWishlist(product.id);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,7 +201,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={image ?? ''}
+                      src={image}
                       alt={`${product.name} - ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -253,23 +303,78 @@ export default function ProductDetailPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 btn-primary py-4 text-lg"
+                  disabled={isAddingToCart}
+                  className="flex-1 btn-primary py-4 text-lg disabled:opacity-50"
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Add to Cart
+                  {isAddingToCart ? (
+                    <span className="spinner border-white" />
+                  ) : showAddedMessage ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      Added!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Add to Cart
+                    </>
+                  )}
                 </button>
                 <button
+                  onClick={handleBuyNow}
+                  className="flex-1 bg-gray-900 text-white py-4 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Buy Now
+                </button>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
                   onClick={handleToggleWishlist}
-                  className={`px-4 py-4 rounded-lg border-2 ${
-                    isInWishlist
-                      ? 'border-red-500 text-red-500'
-                      : 'border-gray-300 text-gray-600 hover:border-gray-400'
+                  className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium flex items-center justify-center transition-colors ${
+                    inWishlist
+                      ? 'border-red-500 text-red-500 bg-red-50'
+                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} />
+                  <Heart className={`h-5 w-5 mr-2 ${inWishlist ? 'fill-current' : ''}`} />
+                  {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
                 </button>
-                <button className="px-4 py-4 rounded-lg border-2 border-gray-300 text-gray-600 hover:border-gray-400">
-                  <Share2 className="h-5 w-5" />
+                <div className="relative">
+                  <button
+                    onClick={() => handleShare('copy')}
+                    className="py-3 px-4 rounded-lg border-2 border-gray-300 text-gray-700 hover:border-gray-400 flex items-center"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </button>
+                  {shareTooltip && (
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                      {shareTooltip}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Share Buttons */}
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <span>Share:</span>
+                <button
+                  onClick={() => handleShare('facebook')}
+                  className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Facebook className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="p-2 rounded-full bg-sky-500 text-white hover:bg-sky-600"
+                >
+                  <Twitter className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleShare('copy')}
+                  className="p-2 rounded-full bg-gray-600 text-white hover:bg-gray-700"
+                >
+                  <LinkIcon className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -349,7 +454,7 @@ export default function ProductDetailPage() {
                         <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                           {review.user?.avatar_url ? (
                             <img
-                              src={review.user?.avatar_url ?? ''}
+                              src={review.user.avatar_url}
                               alt={review.user.full_name || ''}
                               className="w-10 h-10 rounded-full object-cover"
                             />

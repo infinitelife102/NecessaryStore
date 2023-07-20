@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from './providers';
+import { useCart } from '@/lib/cart-context';
 import {
   StoreIcon,
   SearchIcon,
@@ -16,13 +18,24 @@ import {
 } from './icons';
 
 export function Navbar() {
+  const router = useRouter();
   const { user, signOut } = useAuth();
+  const { itemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSignOut = async () => {
     await signOut();
     setIsProfileOpen(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
   };
 
   const navLinks = [
@@ -55,12 +68,16 @@ export function Navbar() {
               </Link>
             ))}
             <div className="relative w-full max-w-sm min-w-[140px]">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
+              <form onSubmit={handleSearch} className="relative w-full">
+                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+ 	    	      </form>
             </div>
           </div>
 
@@ -77,9 +94,11 @@ export function Navbar() {
               className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
             >
               <CartIcon className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
             </Link>
 
             {/* User Menu */}
@@ -192,14 +211,16 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200 animate-slide-up">
           <div className="px-4 py-3">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
-            </div>
+            </form>
           </div>
           <div className="px-4 py-2 space-y-1">
             {navLinks.map((link) => (

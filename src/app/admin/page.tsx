@@ -104,24 +104,130 @@ export default function AdminDashboard() {
         .from('products')
         .select('*', { count: 'exact', head: true });
 
+      // Get date ranges for comparisons
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      // Fetch current month revenue for comparison
+      const { data: currentMonthRevenue } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .eq('payment_status', 'paid')
+        .gte('created_at', currentMonthStart.toISOString())
+        .lte('created_at', currentMonthEnd.toISOString());
+
+      const currentMonthRevenueTotal = currentMonthRevenue?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+      // Fetch previous month revenue
+      const { data: prevMonthRevenue } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .eq('payment_status', 'paid')
+        .gte('created_at', prevMonthStart.toISOString())
+        .lte('created_at', prevMonthEnd.toISOString());
+
+      const prevMonthRevenueTotal = prevMonthRevenue?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+      // Fetch current month orders
+      const { count: currentMonthOrders } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', currentMonthStart.toISOString())
+        .lte('created_at', currentMonthEnd.toISOString());
+
+      // Fetch previous month orders
+      const { count: prevMonthOrders } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', prevMonthStart.toISOString())
+        .lte('created_at', prevMonthEnd.toISOString());
+
+      // Fetch current month customers
+      const { count: currentMonthCustomers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', currentMonthStart.toISOString())
+        .lte('created_at', currentMonthEnd.toISOString());
+
+      // Fetch previous month customers
+      const { count: prevMonthCustomers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', prevMonthStart.toISOString())
+        .lte('created_at', prevMonthEnd.toISOString());
+
+      // Fetch current month products
+      const { count: currentMonthProducts } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', currentMonthStart.toISOString())
+        .lte('created_at', currentMonthEnd.toISOString());
+
+      // Fetch previous month products
+      const { count: prevMonthProducts } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', prevMonthStart.toISOString())
+        .lte('created_at', prevMonthEnd.toISOString());
+
+      // Calculate percentage changes
+      const calculateChange = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Number((((current - previous) / previous) * 100).toFixed(1));
+      };
+
       setStats({
         totalRevenue,
         totalOrders: totalOrders || 0,
         totalCustomers: totalCustomers || 0,
         totalProducts: totalProducts || 0,
-        revenueChange: 12.5,
-        ordersChange: 8.3,
-        customersChange: 15.2,
-        productsChange: 5.7,
+        revenueChange: calculateChange(currentMonthRevenueTotal, prevMonthRevenueTotal),
+        ordersChange: calculateChange(currentMonthOrders || 0, prevMonthOrders || 0),
+        customersChange: calculateChange(currentMonthCustomers || 0, prevMonthCustomers || 0),
+        productsChange: calculateChange(currentMonthProducts || 0, prevMonthProducts || 0),
       });
 
-      // Fetch chart data (last 7 days)
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const chartData = days.map((day) => ({
-        name: day,
-        revenue: Math.floor(Math.random() * 5000) + 2000,
-        orders: Math.floor(Math.random() * 50) + 20,
-      }));
+      // Fetch chart data (last 7 days) - group by date
+      const { data: last7DaysOrders } = await supabase
+        .from('orders')
+        .select('total_amount, created_at')
+        .eq('payment_status', 'paid')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      // Group orders by day
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const chartDataMap = new Map<string, { revenue: number; orders: number }>();
+
+      // Initialize last 7 days with zeros
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const dayName = dayNames[date.getDay()];
+        chartDataMap.set(dayName, { revenue: 0, orders: 0 });
+      }
+
+      // Aggregate data
+      last7DaysOrders?.forEach((order) => {
+        const orderDate = new Date(order.created_at);
+        const dayName = dayNames[orderDate.getDay()];
+        const existing = chartDataMap.get(dayName);
+        if (existing) {
+          chartDataMap.set(dayName, {
+            revenue: existing.revenue + order.total_amount,
+            orders: existing.orders + 1,
+          });
+        }
+      });
+
+      // Convert to chart data format
+      const chartData: ChartData[] = [];
+      chartDataMap.forEach((data, name) => {
+        chartData.push({ name, revenue: data.revenue, orders: data.orders });
+      });
       setChartData(chartData);
 
       // Fetch recent orders

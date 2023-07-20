@@ -1,41 +1,44 @@
 # MarketHub - Multi-Vendor E-Commerce Platform
 
-A comprehensive, production-ready multi-vendor e-commerce platform built with Next.js 14, TypeScript, Tailwind CSS, and Supabase.
-
-![MarketHub](https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200)
+A comprehensive multi-vendor e-commerce platform built with Next.js 14, TypeScript, Tailwind CSS, Supabase, and Stripe.
 
 ## Features
 
-### Core Features
-- **Multi-Vendor Marketplace**: Vendors can register, manage their stores, and sell products
-- **Product Management**: Full CRUD operations with categories, variants, and inventory
-- **Shopping Cart & Checkout**: Seamless shopping experience with Stripe payment integration
-- **Order Management**: Complete order lifecycle from placement to delivery
-- **User Authentication**: Email/password and Google OAuth authentication
-- **Role-Based Access**: Customer, Vendor, and Admin roles
-
-### Advanced Features
-- **AI-Powered Tools**: 
-  - Automatic product description generation using OpenAI GPT
-  - Review summarization and sentiment analysis
-- **Subscription System**: Membership tiers with Stripe Subscriptions
-- **Admin Dashboard**: Comprehensive analytics with charts and reports
-- **Real-time Updates**: Live inventory and order status updates
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
+### User Features
+- **Authentication**: Email/password login, registration, and Google OAuth
+- **Product Catalog**: Browse products by category, search, filter, and sort
+- **Product Details**: View product information, images, reviews, and ratings
+- **Shopping Cart**: Add/remove items, update quantities, persistent cart
+- **Wishlist**: Save favorite products for later
+- **Checkout**: Secure payment processing with Stripe Elements
+- **Order History**: View past orders and track order status
+- **User Profile**: Manage account settings and avatar
 
 ### Vendor Features
-- Vendor registration and store setup
-- Product management dashboard
-- Sales analytics and reporting
-- Commission tracking
-- Order fulfillment management
+- **Vendor Registration**: Apply to become a seller with document upload
+- **Vendor Dashboard**: Manage products, view sales analytics, track orders
+- **Product Management**: Create, edit, and delete products
+- **Order Management**: View and manage customer orders
+- **Sales Analytics**: Track revenue, orders, and performance metrics
 
 ### Admin Features
-- Complete platform management
-- Vendor approval and verification
-- Sales analytics and charts
-- User management
-- Content moderation
+- **Admin Dashboard**: Real-time analytics with charts
+  - Total revenue, orders, customers, and products
+  - Percentage changes comparing current vs previous month
+  - 7-day revenue and order charts (real data from database)
+- **Product Management**: CRUD operations for all products
+- **Vendor Management**: Approve/reject vendor applications
+- **Order Management**: View and manage all orders
+- **User Management**: View customer accounts
+
+### AI Features (Grok API)
+- **Product Description Generation**: AI-powered product descriptions
+- **Review Summarization**: Summarize customer reviews
+
+### Additional Features
+- **Newsletter Subscription**: Email signup for marketing
+- **Contact Form**: Customer support inquiries
+- **Static Pages**: About, FAQ, Privacy Policy, Terms, Shipping, Returns, Help
 
 ## Tech Stack
 
@@ -44,40 +47,47 @@ A comprehensive, production-ready multi-vendor e-commerce platform built with Ne
 - **Styling**: Tailwind CSS
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **Payments**: Stripe (Payments & Subscriptions)
-- **AI**: OpenAI GPT API
+- **Payments**: Stripe (Checkout, Subscriptions)
+- **AI**: Grok API (xAI)
 - **Charts**: Recharts
 - **Icons**: Lucide React
 
-## Getting Started
+## Project Structure
 
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Stripe account
-- OpenAI API key (for AI features)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/markethub.git
-cd markethub
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── admin/             # Admin dashboard pages
+│   ├── api/               # API routes (AI, Stripe webhooks)
+│   ├── auth/              # Authentication pages
+│   ├── vendor/            # Vendor portal pages
+│   ├── vendors/           # Public vendor pages
+│   ├── cart/              # Shopping cart page
+│   ├── checkout/          # Checkout page
+│   ├── wishlist/          # Wishlist page
+│   ├── orders/            # Order history page
+│   ├── profile/           # User profile page
+│   ├── products/          # Product catalog and details
+│   ├── categories/        # Category browsing
+│   └── ...                # Static pages (about, faq, etc.)
+├── components/            # React components
+│   ├── navbar.tsx         # Navigation bar
+│   ├── footer.tsx         # Footer with newsletter
+│   └── providers.tsx      # Context providers
+├── lib/                   # Utility libraries
+│   ├── supabase.ts        # Supabase client
+│   ├── cart-context.tsx   # Cart state management
+│   ├── wishlist-context.tsx # Wishlist state management
+│   └── utils.ts           # Helper functions
+└── types/                 # TypeScript types
+    ├── index.ts           # Main types
+    └── database.ts        # Database types
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+## Environment Variables
 
-3. Copy the environment variables:
-```bash
-cp .env.example .env.local
-```
+Create a `.env.local` file with the following variables:
 
-4. Fill in your environment variables in `.env.local`:
 ```env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
@@ -85,209 +95,94 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Stripe Configuration
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
-STRIPE_SECRET_KEY=sk_test_your_key
-STRIPE_WEBHOOK_SECRET=whsec_your_secret
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your_openai_api_key
+# Grok (xAI) Configuration
+GROK_API_KEY=your_grok_api_key
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### Database Setup
+## Database Setup
 
 1. Create a new Supabase project
-2. Run the SQL schema in the Supabase SQL Editor:
-   - Open `sql/supabase_schema.sql`
-   - Copy and execute all SQL statements
-   
-3. (Optional) Insert sample data:
-   - Open `sql/sample_data.sql`
-   - Execute the SQL statements
+2. Run the SQL schema from `sql/supabase_schema.sql`
+3. (Optional) Run sample data from `sql/sample_data.sql`
 
-### Stripe Setup
+### Key Tables
 
-1. Create a Stripe account
-2. Get your API keys from the Stripe Dashboard
-3. Set up webhook endpoint:
-   - URL: `https://your-domain.com/api/webhooks/stripe`
-   - Events to listen for:
-     - `payment_intent.succeeded`
-     - `payment_intent.payment_failed`
-     - `customer.subscription.created`
-     - `customer.subscription.updated`
-     - `customer.subscription.deleted`
+- `profiles` - User profiles
+- `vendors` - Vendor information
+- `categories` - Product categories
+- `products` - Product listings
+- `reviews` - Product reviews
+- `orders` - Customer orders
+- `order_items` - Order line items
+- `cart_items` - Shopping cart items
+- `wishlist_items` - Wishlist items
+- `newsletter_subscriptions` - Newsletter subscribers
+- `contact_messages` - Contact form submissions
 
-4. Create subscription products in Stripe Dashboard and add price IDs to your environment variables
+## Getting Started
 
-### Development
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-Run the development server:
+2. **Set up environment variables**:
+   Copy `.env.example` to `.env.local` and fill in your credentials.
 
-```bash
-npm run dev
-```
+3. **Set up the database**:
+   Run the SQL scripts in the Supabase SQL Editor.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-### Build for Production
+5. **Open** [http://localhost:3000](http://localhost:3000)
 
-```bash
-npm run build
-```
+## Deployment
 
-## Project Structure
+### Vercel Deployment
 
-```
-my-app/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── admin/              # Admin dashboard
-│   │   ├── api/                # API routes
-│   │   ├── auth/               # Authentication pages
-│   │   ├── products/           # Product pages
-│   │   ├── vendor/             # Vendor dashboard
-│   │   ├── globals.css         # Global styles
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Home page
-│   ├── components/             # React components
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Utility functions
-│   ├── types/                  # TypeScript types
-│   └── types/                  # Type definitions
-├── sql/                        # Database SQL files
-├── docs/                       # Documentation
-├── public/                     # Static assets
-├── .env.example                # Environment variables template
-├── next.config.js              # Next.js configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
-└── package.json                # Dependencies
-```
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
-## Database Schema
+### Important Notes
 
-### Core Tables
-- **profiles**: User profiles extending auth.users
-- **vendors**: Vendor/store information
-- **categories**: Product categories (hierarchical)
-- **products**: Product information
-- **product_variants**: Product variants (size, color, etc.)
-- **reviews**: Product reviews and ratings
-- **carts**: Shopping carts
-- **orders**: Order information
-- **order_items**: Individual order items
-- **subscriptions**: User subscriptions
-- **payments**: Payment records
-- **wishlists**: User wishlists
-- **coupons**: Discount coupons
-- **analytics**: Sales analytics data
-
-### Security
-- Row Level Security (RLS) enabled on all tables
-- Role-based access control
-- Secure API endpoints
-- Protected admin routes
+- Set up Stripe webhooks for production
+- Configure Google OAuth in Supabase
+- Update `NEXT_PUBLIC_APP_URL` for production
 
 ## API Routes
 
-### Authentication
-- `POST /api/auth/*` - Supabase Auth handlers
+### AI Endpoints
+- `POST /api/ai/generate-description` - Generate product descriptions
+- `POST /api/ai/summarize-reviews` - Summarize product reviews
 
-### Payments
+### Stripe Endpoints
 - `POST /api/stripe/create-payment-intent` - Create payment intent
 - `POST /api/stripe/create-subscription` - Create subscription
 - `POST /api/webhooks/stripe` - Stripe webhook handler
 
-### AI
-- `POST /api/ai/generate-description` - Generate product description
-- `POST /api/ai/summarize-reviews` - Summarize product reviews
+## Admin Dashboard Real Data
 
-## Deployment
+The admin dashboard now uses real data from Supabase:
 
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables in Vercel Dashboard
-4. Deploy
-
-### Environment Variables for Vercel
-
-Make sure to add all environment variables from `.env.local` to your Vercel project settings.
-
-### Stripe Webhook in Production
-
-Update your Stripe webhook URL to your production domain:
-```
-https://your-domain.com/api/webhooks/stripe
-```
-
-## Features in Detail
-
-### Multi-Vendor System
-- Vendors can register and create their own store
-- Each vendor has a unique storefront URL
-- Commission-based revenue sharing
-- Vendor analytics and reporting
-
-### Product Management
-- Multiple product images
-- Product variants (size, color, etc.)
-- Inventory tracking
-- SEO optimization
-- Product categories and tags
-
-### Shopping Experience
-- Add to cart functionality
-- Wishlist feature
-- Product search and filtering
-- Product reviews and ratings
-- Related products
-
-### Payment System
-- Stripe integration for secure payments
-- Multiple payment methods support
-- Subscription billing
-- Automatic invoice generation
-
-### Admin Dashboard
-- Sales analytics with charts
-- Order management
-- Vendor approval
-- User management
-- Content moderation
-
-### AI Features
-- Generate product descriptions with AI
-- Summarize customer reviews
-- SEO optimization suggestions
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- **Stats Cards**: Show percentage changes comparing current month vs previous month
+  - Formula: `((current - previous) / previous) × 100`
+  
+- **Charts**: Display actual revenue and orders for the last 7 days
+  - Data is grouped by day of week
+  - Fetched from `orders` table with `payment_status = 'paid'`
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-For support, email support@markethub.com or join our Slack channel.
-
-## Acknowledgments
-
-- [Next.js](https://nextjs.org/)
-- [Supabase](https://supabase.io/)
-- [Stripe](https://stripe.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [OpenAI](https://openai.com/)
-
----
-
-Built with by the MarketHub Team
+MIT License
