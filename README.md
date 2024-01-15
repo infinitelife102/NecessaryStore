@@ -148,18 +148,63 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## Deployment
 
-### Vercel Deployment
+### Deploy to Vercel (recommended)
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+This project is built with **Next.js 14** and can be deployed to **Vercel** as-is.
 
-### Important Notes
+#### 1. Prepare your repository
 
-- Set up Stripe webhooks for production
-- Configure Google OAuth in Supabase
-- Update `NEXT_PUBLIC_APP_URL` for production
+- Push your code to **GitHub** (or GitLab, Bitbucket).
+
+#### 2. Connect the project to Vercel
+
+1. Log in at [vercel.com](https://vercel.com) and go to **Add New → Project**
+2. Select your repository and click **Import**
+3. **Framework Preset**: Next.js (auto-detected)
+4. **Root Directory**: Leave empty (if the project root is correct)
+5. **Build Command**: `npm run build` (default)
+6. **Output Directory**: `.next` (default)
+
+#### 3. Set environment variables
+
+In the Vercel dashboard go to your project → **Settings → Environment Variables** and add the variables below.  
+Check the environments you need (Production, Preview, Development).
+
+| Variable | Description | Note |
+|----------|-------------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Required |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | Required |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Required (server only) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | Required |
+| `STRIPE_SECRET_KEY` | Stripe Secret Key | Required |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Signing Secret | Required if using webhooks |
+| `STRIPE_BASIC_PRICE_ID` | Stripe Basic subscription Price ID | If using subscriptions |
+| `STRIPE_PREMIUM_PRICE_ID` | Stripe Premium Price ID | If using subscriptions |
+| `STRIPE_ENTERPRISE_PRICE_ID` | Stripe Enterprise Price ID | If using subscriptions |
+| `GROK_API_KEY` | Grok (xAI) API Key | If using AI features |
+| `NEXT_PUBLIC_APP_URL` | Deployed site URL | e.g. `https://your-app.vercel.app` |
+
+#### 4. Deploy
+
+- Click **Deploy**; when the build finishes, your deployment URL will be ready.
+
+#### 5. Post-deploy configuration
+
+- **Supabase**
+  - **Authentication → URL Configuration**: Set Site URL to e.g. `https://your-app.vercel.app`
+  - For Google OAuth, add `https://your-app.vercel.app/**` to Redirect URLs
+- **Stripe**
+  - **Developers → Webhooks**: Add endpoint URL `https://your-app.vercel.app/api/webhooks/stripe`, then set the **Signing secret** as `STRIPE_WEBHOOK_SECRET`
+- Set **NEXT_PUBLIC_APP_URL** to your actual deployment URL and redeploy if needed
+
+#### 6. (Optional) Custom domain
+
+- In the Vercel project **Settings → Domains** you can connect a custom domain.
+
+### Notes
+
+- Register the Stripe webhook after your deployment URL is final.
+- If images are served from Supabase Storage or other external domains, add those hosts to `images.domains` in `next.config.mjs` if needed.
 
 ## API Routes
 

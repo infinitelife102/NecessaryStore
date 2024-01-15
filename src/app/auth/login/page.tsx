@@ -57,7 +57,7 @@ export default function LoginPage() {
       if (error) {
         const msg = error.message || '';
         if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-          setError('Google 로그인이 비활성화되어 있습니다. 관리자에게 문의하거나 이메일로 로그인해 주세요.');
+          setError('Google sign-in is disabled. Please contact the administrator or sign in with email.');
         } else {
           setError(error.message);
         }

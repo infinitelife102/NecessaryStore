@@ -439,8 +439,23 @@ CREATE POLICY "Users can delete their own cart" ON carts
 CREATE POLICY "Users can view their own orders" ON orders
     FOR SELECT USING (auth.uid() = user_id);
 
+CREATE POLICY "Admins can view all orders" ON orders
+    FOR SELECT USING (
+        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    );
+
 CREATE POLICY "Users can create orders" ON orders
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Order items: users see items for their orders, admins see all
+CREATE POLICY "Users can view own order items" ON order_items
+    FOR SELECT USING (
+        EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid())
+    );
+CREATE POLICY "Admins can view all order items" ON order_items
+    FOR SELECT USING (
+        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    );
 
 -- Wishlists policies
 CREATE POLICY "Users can view their own wishlist" ON wishlists
@@ -497,8 +512,10 @@ CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions
 -- =====================================================
 -- AUTO-CREATE PROFILE ON SIGNUP (auth.users → profiles)
 -- =====================================================
--- 회원가입 시 클라이언트는 RLS 때문에 profiles INSERT가 막힐 수 있음
--- (이메일 인증 대기 시 auth.uid() 없음). 트리거로 서버에서 자동 생성.
+-- On signup, client may be blocked from INSERT into profiles by RLS
+-- (no auth.uid() while email is unverified). Trigger creates row on server.
+-- EXCEPTION block handles email UNIQUE conflict and other errors to
+-- avoid "Database error querying schema".
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -514,10 +531,21 @@ BEGIN
     'customer'
   )
   ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+    email      = EXCLUDED.email,
+    full_name  = COALESCE(EXCLUDED.full_name, profiles.full_name),
     updated_at = TIMEZONE('utc'::text, NOW());
   RETURN NEW;
+EXCEPTION
+  WHEN unique_violation THEN
+    -- email UNIQUE conflict: update existing profile id to new auth user id
+    UPDATE public.profiles
+    SET id         = NEW.id,
+        updated_at = TIMEZONE('utc'::text, NOW())
+    WHERE email = NEW.email;
+    RETURN NEW;
+  WHEN OTHERS THEN
+    -- ignore all other errors so auth flow is not blocked
+    RETURN NEW;
 END;
 $$;
 
@@ -598,6 +626,14 @@ INSERT INTO categories (name, slug, description, parent_id, sort_order) VALUES
 ('Men', 'men', 'Men''s clothing and accessories', (SELECT id FROM categories WHERE slug = 'clothing'), 1),
 ('Women', 'women', 'Women''s clothing and accessories', (SELECT id FROM categories WHERE slug = 'clothing'), 2),
 ('Kids', 'kids', 'Children''s clothing', (SELECT id FROM categories WHERE slug = 'clothing'), 3);
+
+-- =====================================================
+-- GRANTS (required for PostgREST / "querying schema" errors)
+-- =====================================================
+-- Ensures anon and authenticated roles can access public tables (RLS still applies).
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 
 -- =====================================================
 -- CREATE STORAGE BUCKETS

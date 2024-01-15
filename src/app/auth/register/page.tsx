@@ -58,8 +58,8 @@ export default function RegisterPage() {
       }
 
       if (data.user) {
-        // DB 트리거(handle_new_user)가 auth.users INSERT 시 profiles를 자동 생성함.
-        // 트리거가 없을 때를 대비해 upsert로 보완 (RLS 통과 시에만).
+        // DB trigger (handle_new_user) creates profiles on auth.users INSERT.
+        // Upsert as fallback when trigger is missing (only when RLS allows).
         const { error: profileError } = await supabase.from('profiles').upsert(
           {
             id: data.user.id,
@@ -98,7 +98,7 @@ export default function RegisterPage() {
       if (error) {
         const msg = error.message || '';
         if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-          setError('Google 가입이 비활성화되어 있습니다. 관리자에게 문의하거나 이메일로 가입해 주세요.');
+          setError('Google sign-up is disabled. Please contact the administrator or register with email.');
         } else {
           setError(error.message);
         }

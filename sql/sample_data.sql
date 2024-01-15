@@ -5,6 +5,15 @@
 --
 -- This file seeds auth.users + profiles first so that vendors/reviews
 -- foreign keys are satisfied. All sample users use password: Password123!
+--
+-- LOGIN FOR TESTING (use Sign in, not Register):
+--   Admin:  admin@sample.com   / Password123!  → /admin (Admin Panel)
+--   Vendor: vendor1@sample.com / Password123!  → /vendor/dashboard (Vendor Dashboard)
+--           (vendor2@sample.com ... vendor5@sample.com also work)
+--   Customer: customer6@sample.com / Password123!
+--
+-- If you get "Database error querying schema" after login: ensure supabase_schema.sql
+-- was run (it includes GRANTs for anon, authenticated on public tables).
 
 -- Enable password hashing for auth seed
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -33,7 +42,8 @@ BEGIN
       ('00000000-0000-0000-0000-000000000007'::UUID, 'customer7@sample.com', 'Customer Seven', 'customer'),
       ('00000000-0000-0000-0000-000000000008'::UUID, 'customer8@sample.com', 'Customer Eight', 'customer'),
       ('00000000-0000-0000-0000-000000000009'::UUID, 'customer9@sample.com', 'Customer Nine', 'customer'),
-      ('00000000-0000-0000-0000-00000000000a'::UUID, 'customer10@sample.com', 'Customer Ten', 'customer')
+      ('00000000-0000-0000-0000-00000000000a'::UUID, 'customer10@sample.com', 'Customer Ten', 'customer'),
+      ('00000000-0000-0000-0000-00000000000b'::UUID, 'admin@sample.com', 'MarketHub Admin', 'admin')
     ) AS t(id, email, full_name, role)
   LOOP
     v_uid := rec.id;
@@ -67,8 +77,8 @@ END $$;
 -- =====================================================
 -- SAMPLE PROFILES (required before vendors/reviews)
 -- =====================================================
--- 트리거(on_auth_user_created)가 이미 profiles 행을 생성했을 수 있으므로
--- ON CONFLICT DO UPDATE 로 role/full_name/email 반영 (벤더 역할 등)
+-- Trigger (on_auth_user_created) may have already created profile rows;
+-- use ON CONFLICT DO UPDATE to set role/full_name/email (e.g. vendor role)
 INSERT INTO profiles (id, email, full_name, role) VALUES
 ('00000000-0000-0000-0000-000000000001', 'vendor1@sample.com', 'TechWorld Vendor', 'vendor'),
 ('00000000-0000-0000-0000-000000000002', 'vendor2@sample.com', 'Fashion Hub Vendor', 'vendor'),
@@ -79,7 +89,8 @@ INSERT INTO profiles (id, email, full_name, role) VALUES
 ('00000000-0000-0000-0000-000000000007', 'customer7@sample.com', 'Customer Seven', 'customer'),
 ('00000000-0000-0000-0000-000000000008', 'customer8@sample.com', 'Customer Eight', 'customer'),
 ('00000000-0000-0000-0000-000000000009', 'customer9@sample.com', 'Customer Nine', 'customer'),
-('00000000-0000-0000-0000-00000000000a', 'customer10@sample.com', 'Customer Ten', 'customer')
+('00000000-0000-0000-0000-00000000000a', 'customer10@sample.com', 'Customer Ten', 'customer'),
+('00000000-0000-0000-0000-00000000000b', 'admin@sample.com', 'MarketHub Admin', 'admin')
 ON CONFLICT (id) DO UPDATE SET
   email = EXCLUDED.email,
   full_name = EXCLUDED.full_name,

@@ -43,7 +43,7 @@
     @apply block w-full rounded-lg border border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
 
-  /* Auth pages: 부드러운 테두리, 포커스 시에만 강조 (input 칸 border 보기 좋게) */
+  /* Auth pages: soft border, emphasis on focus only (clean input border) */
   .input-auth {
     @apply block w-full rounded-xl bg-gray-50/80 text-gray-900 placeholder:text-gray-400;
     @apply border border-transparent;

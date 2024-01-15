@@ -29,14 +29,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile:', error);
+      // If schema/permission error, suggest re-running schema GRANTs
+      if (error.message?.toLowerCase().includes('schema') || error.code === 'PGRST106') {
+        console.error('If you see "querying schema" in UI: run supabase_schema.sql GRANTs or re-run the schema.');
+      }
       return null;
     }
 
-    return data as Profile;
+    return data as Profile | null;
   };
 
   const refreshUser = async () => {
