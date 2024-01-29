@@ -1,60 +1,74 @@
-# MarketHub - Multi-Vendor E-Commerce Platform
+<div align="center">
+  <h1>🛒 MarketHub - Multi-Vendor E-Commerce Platform</h1>
+  <p><strong>A comprehensive multi-vendor e-commerce platform built with Next.js 14, TypeScript, Tailwind CSS, Supabase, and Stripe.</strong></p>
+  
+  <a href="https://market-hub-delta.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fmarket-hub-delta.vercel.app%2F&up_message=online&down_message=offline&style=for-the-badge&logo=vercel" alt="Website Status"/>
+  </a>
+  <br/>
+  
+  <h3>🔗 <strong>Live Demo:</strong> <a href="https://market-hub-delta.vercel.app/">MarketHub (Vercel)</a></h3>
+</div>
 
-A comprehensive multi-vendor e-commerce platform built with Next.js 14, TypeScript, Tailwind CSS, Supabase, and Stripe.
+---
 
-## Features
+## ✨ Features
 
-### User Features
-- **Authentication**: Email/password login, registration, and Google OAuth
-- **Product Catalog**: Browse products by category, search, filter, and sort
-- **Product Details**: View product information, images, reviews, and ratings
-- **Shopping Cart**: Add/remove items, update quantities, persistent cart
-- **Wishlist**: Save favorite products for later
-- **Checkout**: Secure payment processing with Stripe Elements
-- **Order History**: View past orders and track order status
-- **User Profile**: Manage account settings and avatar
+### 🛒 User Features
+- **Authentication 🔐**: Email/password login, registration, and Google OAuth
+- **Product Catalog 📋**: Browse products by category, search, filter, and sort
+- **Product Details 🏷️**: View product information, images, reviews, and ratings
+- **Shopping Cart 🛍️**: Add/remove items, update quantities, persistent cart
+- **Wishlist ❤️**: Save favorite products for later
+- **Checkout 💳**: Secure payment processing with Stripe Elements
+- **Order History 📦**: View past orders and track order status
+- **User Profile 👤**: Manage account settings and avatar
 
-### Vendor Features
-- **Vendor Registration**: Apply to become a seller with document upload
-- **Vendor Dashboard**: Manage products, view sales analytics, track orders
-- **Product Management**: Create, edit, and delete products
-- **Order Management**: View and manage customer orders
-- **Sales Analytics**: Track revenue, orders, and performance metrics
+### 🏪 Vendor Features
+- **Vendor Registration 📝**: Apply to become a seller with document upload
+- **Vendor Dashboard 📊**: Manage products, view sales analytics, track orders
+- **Product Management ⚙️**: Create, edit, and delete products
+- **Order Management 🧾**: View and manage customer orders
+- **Sales Analytics 📈**: Track revenue, orders, and performance metrics
 
-### Admin Features
-- **Admin Dashboard**: Real-time analytics with charts
-  - Total revenue, orders, customers, and products
-  - Percentage changes comparing current vs previous month
-  - 7-day revenue and order charts (real data from database)
-- **Product Management**: CRUD operations for all products
-- **Vendor Management**: Approve/reject vendor applications
-- **Order Management**: View and manage all orders
-- **User Management**: View customer accounts
+### 👨‍💻 Admin Features
+- **Admin Dashboard 📉**: Real-time analytics with charts
+  - 💰 Total revenue, 📦 orders, 👥 customers, and 🏷️ products
+  - 📊 Percentage changes comparing current vs previous month
+  - 📅 7-day revenue and order charts (real data from database)
+- **Product Management ✏️**: CRUD operations for all products
+- **Vendor Management 🏢**: Approve/reject vendor applications
+- **Order Management 🚚**: View and manage all orders
+- **User Management 👥**: View customer accounts
 
-### AI Features (Grok API)
-- **Product Description Generation**: AI-powered product descriptions
-- **Review Summarization**: Summarize customer reviews
+### 🤖 AI Features (Grok API)
+- **Product Description Generation ✍️**: AI-powered product descriptions
+- **Review Summarization 📑**: Summarize customer reviews
 
-### Additional Features
-- **Newsletter Subscription**: Email signup for marketing
-- **Contact Form**: Customer support inquiries
-- **Static Pages**: About, FAQ, Privacy Policy, Terms, Shipping, Returns, Help
+### ➕ Additional Features
+- **Newsletter Subscription 📧**: Email signup for marketing
+- **Contact Form ✉️**: Customer support inquiries
+- **Static Pages 📄**: About, FAQ, Privacy Policy, Terms, Shipping, Returns, Help
 
-## Tech Stack
+---
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Payments**: Stripe (Checkout, Subscriptions)
-- **AI**: Grok API (xAI)
-- **Charts**: Recharts
-- **Icons**: Lucide React
+## 🛠️ Tech Stack
 
-## Project Structure
+- **Framework ⚛️**: Next.js 14 (App Router)
+- **Language 📘**: TypeScript
+- **Styling 🎨**: Tailwind CSS
+- **Database 🐘**: Supabase (PostgreSQL)
+- **Authentication 🔑**: Supabase Auth
+- **Payments 💸**: Stripe (Checkout, Subscriptions)
+- **AI 🧠**: Grok API (xAI)
+- **Charts 📉**: Recharts
+- **Icons 🧩**: Lucide React
 
-```
+---
+
+## 📁 Project Structure
+
+```text
 src/
 ├── app/                    # Next.js App Router
 │   ├── admin/             # Admin dashboard pages
@@ -84,7 +98,9 @@ src/
     └── database.ts        # Database types
 ```
 
-## Environment Variables
+---
+
+## ⚙️ Environment Variables
 
 Create a `.env.local` file with the following variables:
 
@@ -106,13 +122,15 @@ GROK_API_KEY=your_grok_api_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-## Database Setup
+---
 
-1. Create a new Supabase project
-2. Run the SQL schema from `sql/supabase_schema.sql`
-3. (Optional) Run sample data from `sql/sample_data.sql`
+## 🗄️ Database Setup
 
-### Key Tables
+1. 🆕 Create a new Supabase project
+2. 🚀 Run the SQL schema from `sql/supabase_schema.sql`
+3. 📦 *(Optional)* Run sample data from `sql/sample_data.sql`
+
+### 🔑 Key Tables
 
 - `profiles` - User profiles
 - `vendors` - Vendor information
@@ -126,7 +144,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `newsletter_subscriptions` - Newsletter subscribers
 - `contact_messages` - Contact form submissions
 
-## Getting Started
+---
+
+## 🚀 Getting Started
 
 1. **Install dependencies**:
    ```bash
@@ -146,18 +166,18 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 5. **Open** [http://localhost:3000](http://localhost:3000)
 
-## Deployment
+---
 
-### Deploy to Vercel (recommended)
+## 🌐 Deployment
+
+### 🚀 Deploy to Vercel (recommended)
 
 This project is built with **Next.js 14** and can be deployed to **Vercel** as-is.
 
 #### 1. Prepare your repository
-
 - Push your code to **GitHub** (or GitLab, Bitbucket).
 
 #### 2. Connect the project to Vercel
-
 1. Log in at [vercel.com](https://vercel.com) and go to **Add New → Project**
 2. Select your repository and click **Import**
 3. **Framework Preset**: Next.js (auto-detected)
@@ -166,7 +186,6 @@ This project is built with **Next.js 14** and can be deployed to **Vercel** as-i
 6. **Output Directory**: `.next` (default)
 
 #### 3. Set environment variables
-
 In the Vercel dashboard go to your project → **Settings → Environment Variables** and add the variables below.  
 Check the environments you need (Production, Preview, Development).
 
@@ -182,52 +201,53 @@ Check the environments you need (Production, Preview, Development).
 | `STRIPE_PREMIUM_PRICE_ID` | Stripe Premium Price ID | If using subscriptions |
 | `STRIPE_ENTERPRISE_PRICE_ID` | Stripe Enterprise Price ID | If using subscriptions |
 | `GROK_API_KEY` | Grok (xAI) API Key | If using AI features |
-| `NEXT_PUBLIC_APP_URL` | Deployed site URL | e.g. `https://your-app.vercel.app` |
+| `NEXT_PUBLIC_APP_URL` | Deployed site URL | e.g. `https://market-hub-delta.vercel.app` |
 
 #### 4. Deploy
-
 - Click **Deploy**; when the build finishes, your deployment URL will be ready.
 
 #### 5. Post-deploy configuration
-
-- **Supabase**
-  - **Authentication → URL Configuration**: Set Site URL to e.g. `https://your-app.vercel.app`
-  - For Google OAuth, add `https://your-app.vercel.app/**` to Redirect URLs
-- **Stripe**
-  - **Developers → Webhooks**: Add endpoint URL `https://your-app.vercel.app/api/webhooks/stripe`, then set the **Signing secret** as `STRIPE_WEBHOOK_SECRET`
-- Set **NEXT_PUBLIC_APP_URL** to your actual deployment URL and redeploy if needed
+- **Supabase 🐘**
+  - **Authentication → URL Configuration**: Set Site URL to e.g. `https://market-hub-delta.vercel.app`
+  - For Google OAuth, add `https://market-hub-delta.vercel.app/**` to Redirect URLs
+- **Stripe 💸**
+  - **Developers → Webhooks**: Add endpoint URL `https://market-hub-delta.vercel.app/api/webhooks/stripe`, then set the **Signing secret** as `STRIPE_WEBHOOK_SECRET`
+- Set **NEXT_PUBLIC_APP_URL** to your actual deployment URL and redeploy if needed.
 
 #### 6. (Optional) Custom domain
-
 - In the Vercel project **Settings → Domains** you can connect a custom domain.
 
-### Notes
-
+### 📝 Notes
 - Register the Stripe webhook after your deployment URL is final.
 - If images are served from Supabase Storage or other external domains, add those hosts to `images.domains` in `next.config.mjs` if needed.
 
-## API Routes
+---
 
-### AI Endpoints
+## 📡 API Routes
+
+### 🤖 AI Endpoints
 - `POST /api/ai/generate-description` - Generate product descriptions
 - `POST /api/ai/summarize-reviews` - Summarize product reviews
 
-### Stripe Endpoints
+### 💳 Stripe Endpoints
 - `POST /api/stripe/create-payment-intent` - Create payment intent
 - `POST /api/stripe/create-subscription` - Create subscription
 - `POST /api/webhooks/stripe` - Stripe webhook handler
 
-## Admin Dashboard Real Data
+---
+
+## 📈 Admin Dashboard Real Data
 
 The admin dashboard now uses real data from Supabase:
 
-- **Stats Cards**: Show percentage changes comparing current month vs previous month
+- **Stats Cards 📊**: Show percentage changes comparing current month vs previous month
   - Formula: `((current - previous) / previous) × 100`
-  
-- **Charts**: Display actual revenue and orders for the last 7 days
+- **Charts 📉**: Display actual revenue and orders for the last 7 days
   - Data is grouped by day of week
   - Fetched from `orders` table with `payment_status = 'paid'`
 
-## License
+---
+
+## 📜 License
 
 MIT License
