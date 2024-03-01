@@ -8,6 +8,10 @@
   <br/>
   
   <h3>🔗 <strong>Live Demo:</strong> <a href="https://market-hub-delta.vercel.app/">MarketHub (Vercel)</a></h3>
+  <a href="https://market-hub-delta.vercel.app/" target="_blank">
+    <img src="./images/MarketHub.png" alt="Click to open MarketHub Live Demo" width="900"/>
+  </a>
+  <p><em>Click the image above to go directly to the live demo.</em></p>
 </div>
 
 ---
